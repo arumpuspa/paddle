@@ -1,3 +1,9 @@
+import os
+
+os.environ["FLAGS_enable_pir_api"] = "0"
+os.environ["FLAGS_use_pir_api"] = "0"
+os.environ["FLAGS_use_mkldnn"] = "0"
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import shutil
 import os
