@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 import shutil
 import os
 from paddlex import create_pipeline
+from fastapi.encoders import jsonable_encoder
 
 app = FastAPI(title="PaddleX Table Recognition API")
 
@@ -29,26 +30,28 @@ def root():
 # -------------------------------------------------
 # Table recognition endpoint
 # -------------------------------------------------
+
 @app.post("/table-recognition")
 async def table_recognition(file: UploadFile = File(...)):
     try:
         temp_path = f"temp_{file.filename}"
 
-        # save upload
+        # Save uploaded file
         with open(temp_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
 
         # PaddleX returns generator
-        result = next(pipeline.predict(temp_path))
+        results = list(pipeline.predict(temp_path))
 
-        # delete temp file
+        # Delete temp file
         os.remove(temp_path)
 
-        # return JSON only
-        return {"result": result}
+        # Convert to JSON-safe format
+        return jsonable_encoder({"result": results})
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 # -------------------------------------------------
