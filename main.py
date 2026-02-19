@@ -42,21 +42,27 @@ async def table_recognition(file: UploadFile = File(...)):
     try:
         temp_path = f"temp_{file.filename}"
 
-        # Save uploaded file
         with open(temp_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
 
-        # PaddleX returns generator
         results = list(pipeline.predict(temp_path))
 
-        # Delete temp file
         os.remove(temp_path)
 
-        # Convert to JSON-safe format
-        return jsonable_encoder({"result": results})
+        clean_output = []
+
+        for res in results:
+            # Convert PaddleX result object to pure dict
+            if hasattr(res, "__dict__"):
+                clean_output.append(res.__dict__)
+            else:
+                clean_output.append(str(res))  # fallback safe conversion
+
+        return {"result": clean_output}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
