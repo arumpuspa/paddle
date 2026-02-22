@@ -9,8 +9,16 @@ import shutil
 import os
 from paddlex import create_pipeline
 from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PaddleX Table Recognition API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all (for testing)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # -------------------------------------------------
 # Load pipeline ONCE at startup (important for speed)
