@@ -66,7 +66,10 @@ async def table_recognition(file: UploadFile = File(...)):
 
         output = []
 
-        for res in pipeline.predict(temp_path):
+        for res in pipeline.predict(temp_path, use_layout_detection=True, use_doc_unwarping=True, use_doc_orientation_classify=True):
+
+            print(dir(res))
+            print(res)
 
             # 🔥 This is the correct way for PaddleX v2
             if hasattr(res, "to_dict"):
