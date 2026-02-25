@@ -66,7 +66,7 @@ async def table_recognition(file: UploadFile = File(...)):
 
         output = []
 
-        for res in pipeline.predict(temp_path, use_layout_detection=True, use_doc_unwarping=True, use_doc_orientation_classify=True):
+        for res in pipeline.predict(temp_path, use_layout_detection=False, use_doc_unwarping=False, use_doc_orientation_classify=False):
 
             print(dir(res))
             print(res)
