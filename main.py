@@ -57,11 +57,10 @@ def root():
 # -------------------------------
 @app.post("/table-recognition")
 async def table_recognition(file: UploadFile = File(...)):
-    import json
-
     temp_path = f"/tmp/{uuid.uuid4()}.jpg"
 
     try:
+        # Save uploaded file
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
@@ -69,25 +68,18 @@ async def table_recognition(file: UploadFile = File(...)):
 
         for res in pipeline.predict(temp_path):
 
-            # BEST CASE (PaddleX v2 usually has this)
-            if hasattr(res, "to_dict") and callable(res.to_dict):
+            # 🔥 This is the correct way for PaddleX v2
+            if hasattr(res, "to_dict"):
                 output.append(res.to_dict())
 
-            # Fallback: safe JSON conversion
+            elif hasattr(res, "json"):
+                output.append(res.json)
+
+            elif hasattr(res, "result"):
+                output.append(res.result)
+
             else:
-                safe_dict = {}
-
-                for key, value in vars(res).items():
-                    if callable(value):
-                        continue  # skip methods
-
-                    try:
-                        json.dumps(value)  # test if JSON serializable
-                        safe_dict[key] = value
-                    except TypeError:
-                        safe_dict[key] = str(value)
-
-                output.append(safe_dict)
+                output.append(str(res))
 
         return {"result": output}
 
@@ -98,7 +90,6 @@ async def table_recognition(file: UploadFile = File(...)):
         if os.path.exists(temp_path):
             os.remove(temp_path)
         gc.collect()
-
 
 # -------------------------------
 # ▶ Run manually
